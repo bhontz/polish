@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+void displayMessageToUser(String message, BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(title: Text(message)),
+  );
+}
+
 class RegularExpressionPatterns {
   static RegExp passwordPattern() {
     return RegExp(r'^(?=(.*\d.*){2})(?=(.*[\W_].*)).{8,}$');

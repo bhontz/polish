@@ -3,6 +3,7 @@ import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/authscreens/auth_bloc.dart';
+import 'bloc/productscreens/product_bloc.dart';
 import 'screens/login_or_register.dart';
 import 'screens/theme.dart';
 
@@ -23,11 +24,10 @@ class MyApp extends StatelessWidget {
       theme: appTheme, // see theme.dart
       home: MultiBlocProvider(
         providers: [
-          // BlocProvider(create: (context) => AppMenuBloc()),
-          BlocProvider(create: (context) => AuthScreensBloc()),
-        ],
-        child:
-            LoginOrRegister(), // RegisterPage(), // LoginPage(), // FoundationPage(), // LoginOrRegister(),
+          BlocProvider(create: (context) => AuthBloc()),
+          BlocProvider(create: (context) => VisionAPIBloc()),
+        ], // kept multi around for now
+        child: AuthWidget(),
       ),
     );
   }

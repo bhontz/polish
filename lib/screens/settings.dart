@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../components/buttons.dart';
 import 'login_or_register.dart';
+import 'homepage.dart';
+import 'theme.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -15,10 +17,10 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Settings")),
-      // note: AppBar has a default return to prior screen so ElevatedButton below is redunant
-      body: Center(
+    return MaterialApp(
+      theme: appTheme,
+      debugShowCheckedModeBanner: false,
+      home: Center(
         child: Column(
           children: [
             const SizedBox(height: 20),
@@ -26,7 +28,9 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => HomePage()));
               },
               child: Text("This is the Settings Page"),
             ),
@@ -36,3 +40,25 @@ class SettingsPage extends StatelessWidget {
     );
   }
 }
+
+
+
+    // return Scaffold(
+    //   appBar: AppBar(title: Text("Settings")),
+    //   // note: AppBar has a default return to prior screen so ElevatedButton below is redunant
+    //   body: Center(
+    //     child: Column(
+    //       children: [
+    //         const SizedBox(height: 20),
+    //         MyButton(text: "Sign out", onTap: () => signOut(context)),
+    //         const SizedBox(height: 30),
+    //         ElevatedButton(
+    //           onPressed: () {
+    //             Navigator.of(context).pop();
+    //           },
+    //           child: Text("This is the Settings Page"),
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    // );

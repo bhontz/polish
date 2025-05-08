@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../components/textfields.dart';
 import '../components/buttons.dart';
-import 'foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'homepage.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -15,12 +16,10 @@ class LoginPage extends StatelessWidget {
 
   LoginPage({super.key, required this.onTap});
 
-  // THIS IS REDUNDANT GET IT INTO ANOTHER FILE
-  void displayMessageToUser(String message, BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(title: Text(message)),
-    );
+  void saveAuthLocally(String email, String password) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('username', email);
+    prefs.setString('password', password);
   }
 
   void login(BuildContext context) async {
@@ -34,10 +33,15 @@ class LoginPage extends StatelessWidget {
           email: emailController.text,
           password: pwController.text,
         );
+
+        saveAuthLocally(emailController.text, pwController.text);
+
         Navigator.of(
           // ignore: use_build_context_synchronously
           context,
-        ).push(MaterialPageRoute(builder: (context) => const FoundationPage()));
+        ).push(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        ); // FoundationPage()
       } on FirebaseAuthException catch (e) {
         // ignore: use_build_context_synchronously
         displayMessageToUser(e.code, context);

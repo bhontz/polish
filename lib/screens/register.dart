@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../components/textfields.dart';
 import '../components/buttons.dart';
-import 'foundation.dart';
-
-// import '../models/book_model.dart';
-// import '../services/googleapi_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'homepage.dart';
 
 class RegisterPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -21,11 +19,10 @@ class RegisterPage extends StatelessWidget {
 
   RegisterPage({super.key, required this.onTap});
 
-  void displayMessageToUser(String message, BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(title: Text(message)),
-    );
+  void saveAuthLocally(String email, String password) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('username', email);
+    prefs.setString('password', password);
   }
 
   void registerUser(BuildContext context) async {
@@ -43,11 +40,14 @@ class RegisterPage extends StatelessWidget {
               email: emailController.text,
               password: pwController.text,
             );
+        saveAuthLocally(emailController.text, pwController.text);
         createUserDocument(userCredential);
         Navigator.of(
           // ignore: use_build_context_synchronously
           context,
-        ).push(MaterialPageRoute(builder: (context) => const FoundationPage()));
+        ).push(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        ); // FoundationPage()
       } on FirebaseAuthException catch (e) {
         // ignore: use_build_context_synchronously
         displayMessageToUser(e.code, context);
