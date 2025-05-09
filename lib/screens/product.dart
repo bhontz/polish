@@ -24,6 +24,8 @@ class ProductPage extends StatelessWidget {
       return GestureDetector(
         onTap: () {
           bc = sHex;
+          visionBloc.add(ChangeBC());
+          // bc = sHex;
         },
         child: Container(
           color: Color(int.parse(sHex.replaceFirst('#', 'ff'), radix: 16)),
@@ -70,8 +72,7 @@ class ProductPage extends StatelessWidget {
             break;
           }
           debugPrint(polishColors.toString());
-          bc = polishColors[0];
-          visionBloc.add(ColorScan());
+          visionBloc.add(ImageCapture());
         }
       }
       return Container();
@@ -82,16 +83,22 @@ class ProductPage extends StatelessWidget {
         builder: (context, state) {
           if (state is Loading) {
             return CircularProgressIndicator();
-          } else if (state is ScannedColors) {
+          } else if (state is CapturedImage || state is ChangingBC) {
             return Column(
               children: [
                 Stack(
                   alignment: Alignment.center,
                   children: <Widget>[
                     Container(
-                      color: Color(
-                        int.parse(bc.replaceFirst('#', 'ff'), radix: 16),
-                      ),
+                      color:
+                          (state is ChangingBC)
+                              ? Color(
+                                int.parse(
+                                  bc.replaceFirst('#', 'ff'),
+                                  radix: 16,
+                                ),
+                              )
+                              : Color(0xff696969),
                       width: double.infinity,
                       height: 200,
                       // alignment: Alignment.center,
