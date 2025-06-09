@@ -5,6 +5,8 @@ sealed class VisionAPIEvent {}
 
 final class ImageCapture extends VisionAPIEvent {}
 
+final class BrandCapture extends VisionAPIEvent {}
+
 final class ChangeBC extends VisionAPIEvent {}
 
 // State

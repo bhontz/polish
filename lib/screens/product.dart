@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_vision_flutter/google_vision_flutter.dart';
 import '../bloc/productscreens/product_bloc.dart';
+import '../services/googleapi_service.dart';
 import 'dart:io';
 import 'homepage.dart';
 import 'theme.dart';
@@ -14,11 +17,18 @@ class ProductPage extends StatelessWidget {
   const ProductPage({super.key, required this.polishImage});
   final File? polishImage;
 
+  Future<String> imageToBase64() async {
+    File imageFile = File(polishImage!.path);
+    List<int> imageBytes = await imageFile.readAsBytes();
+    return base64Encode(imageBytes);
+  }
+
   @override
   Widget build(BuildContext context) {
     final VisionAPIBloc visionBloc = BlocProvider.of<VisionAPIBloc>(context);
     String bc = '#696969';
     List<String> polishColors = [];
+    String brandName = "NOT*DETECTED";
 
     Widget buildCard(String sHex) {
       return GestureDetector(
@@ -44,37 +54,20 @@ class ProductPage extends StatelessWidget {
       return colorSamples;
     }
 
-    Widget captureImageLabelText(List<EntityAnnotation>? entityAnnotations) {
-      if (entityAnnotations != null) {
-        var s = entityAnnotations[0].description;
-        debugPrint(s.replaceAll('\n', ','));
-      }
-      return Container();
-    }
+    Widget googleVisionApi() {
+      RecognizeProvider rec = RecognizeProvider();
+      imageToBase64().then((String result) {
+        rec.imageText(result).then((String b) {
+          debugPrint("from RecognizeProvider method imageText: $b");
+          brandName = b;
+          rec.imageColors(result).then((List<String> colorList) {
+            debugPrint("from RecognizeProvider method imageColors: $colorList");
+            polishColors.addAll(colorList);
+            visionBloc.add(ImageCapture());
+          });
+        });
+      });
 
-    Widget captureImageColors(
-      ImagePropertiesAnnotation? imagePropertiesAnnotations,
-    ) {
-      var counter = 0;
-      if (imagePropertiesAnnotations != null) {
-        polishColors = [];
-        for (var d in imagePropertiesAnnotations.dominantColors.colors) {
-          String? hex = '#';
-          if (d.score > 0.09) {
-            counter = counter += 1;
-            hex += d.color.red.toInt().toRadixString(16).padLeft(2, '0');
-            hex += d.color.green.toInt().toRadixString(16).padLeft(2, '0');
-            hex += d.color.blue.toInt().toRadixString(16).padLeft(2, '0');
-            debugPrint(hex);
-            polishColors.add(hex);
-          }
-          if (counter == 5) {
-            break;
-          }
-          debugPrint(polishColors.toString());
-          visionBloc.add(ImageCapture());
-        }
-      }
       return Container();
     }
 
@@ -101,7 +94,6 @@ class ProductPage extends StatelessWidget {
                               : Color(0xff696969),
                       width: double.infinity,
                       height: 200,
-                      // alignment: Alignment.center,
                     ),
                     SizedBox(
                       height: 200,
@@ -114,10 +106,11 @@ class ProductPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: createColorChoices(polishColors),
-                  // sTest,
                 ),
+                const SizedBox(height: 20),
+                Text(brandName, style: TextStyle(fontSize: 24)),
               ],
-            );
+            ); // Column
           } else {
             return Container();
           }
@@ -131,26 +124,7 @@ class ProductPage extends StatelessWidget {
       home: Center(
         child: Column(
           children: <Widget>[
-            GoogleVisionImageBuilder.imageProperties(
-              googleVision: googleVision,
-              imageProvider:
-                  Image.file(polishImage!, fit: BoxFit.contain).image,
-              builder:
-                  (
-                    BuildContext context,
-                    ImagePropertiesAnnotation? imagePropertiesAnnotations,
-                  ) => captureImageColors(imagePropertiesAnnotations),
-            ),
-            GoogleVisionImageBuilder.textDetection(
-              googleVision: googleVision,
-              imageProvider:
-                  Image.file(polishImage!, fit: BoxFit.contain).image,
-              builder:
-                  (
-                    BuildContext context,
-                    List<EntityAnnotation>? entityAnnotations,
-                  ) => captureImageLabelText(entityAnnotations),
-            ),
+            googleVisionApi(),
             conditionalPart(),
             const SizedBox(height: 20),
             ElevatedButton(
